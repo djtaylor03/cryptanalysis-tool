@@ -40,14 +40,75 @@ public class SPN {
     }
 
     // run SPN
-    static int[] runSPN(int[] pt){
-        int[] ciphertext = new int[16]; 
+    // p is plain text and should be a list of binary values
+    /* 
+     * Formatting should be p.shape = (w, r) 
+     * w = width of s-box (for heys, 4 bits)
+     * r = how many s-boxes the substitution matrix is. length of key should be (rounds + 1)* w bits long
+     */
+    public int[][] runSPN(int[][] p){
+        int[][] u = p;     // intermediate cipher text and starts as plaintext
+        int[][] c;     // final cipher text
 
-        return ciphertext;
+        // N-1 whole rounds
+        for ( int i=0; i < this.rounds; i++){
+            u = this.subkeyMix(p,0);
+            u = this.substitue(u);
+            u = this.permute(u);
+        }
+
+        // final round
+        u = this.subkeyMix(u,0);
+        u = this.substitue(u);
+        c = this.subkeyMix(u,0);
+
+        // output cipher text
+        return c;
     }
+
 
     // helper methods
 
+    // methods to convert to and from binary
+    public int binaryToInt(int[] bs){
+        int i = 0;
+        int len = (bs.length) - 1;
 
+        for (int c = 0; c < bs.length; c++) {
+            if (bs[c] == 1) {
+                i+=Math.pow(2,len); 
+            }
+            len--;
+        }
+        return i;
+    }
 
+    // TODO make more robust for other SPNs
+    public int[] intToBinary(int i){
+        int[] bs = new int [4];
+        for (int m = 3; m < -1; m--){
+            bs[m] = i%2;
+            i = i - ((i/2)+(i%2));
+        }
+        return bs;
+    }
+
+    // XOR values with subkey, r is round number
+    public int[][] subkeyMix(int[][] t, int r){
+
+        return t;
+    }
+
+    // substitutes a list of intermediate text inputs. Should be 16 
+    public int[][] substitue(int[][] t){
+        int[][] u;
+
+        return t;
+    }
+
+    // permutes a list text inputs 
+    public int[][] permute(int[][] t){        
+
+        return t;
+    }
 }
