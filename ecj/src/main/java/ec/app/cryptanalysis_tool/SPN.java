@@ -3,6 +3,7 @@ package ec.app.cryptanalysis_tool;
 
 // TODO Make a hell of a lot more robust. Currently only works specifically for my purposes.
 // TODO remove half of s and p as they're only indexes.
+// TODO change implementation to take in TRUE/FALSE boolean instead of 0's and 1's
 public class SPN {
     int[] substitutions;  // table for substitutions
     int[] permutations;   // table for permutations
@@ -75,8 +76,21 @@ public class SPN {
 
     // XOR values with subkey, r is round number
     public int[][] subkeyMix(int[][] t, int r){
+        int[][] u = t;
+        int offset = (16*r);
 
-        return t;
+        for( int i = 0; i < t.length; i++ ){
+            for ( int j = 0; j < t[i].length; j++ ){
+                int ans = 0;
+                if (t[i][j] != this.subkey[i+j + offset]){
+                    ans = 1;
+                } else {
+                    ans = 0;
+                }
+                u[i][j] = ans;
+            }
+        }
+        return u;
     }
 
     // substitutes a list of intermediate text inputs. Should be 16 in a [4][4] format
