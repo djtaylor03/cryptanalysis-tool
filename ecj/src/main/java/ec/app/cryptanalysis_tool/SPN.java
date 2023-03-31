@@ -1,5 +1,7 @@
 package ec.app.cryptanalysis_tool;
 
+
+// TODO Make a hell of a lot more robust. Currently only works specifically for my purposes.
 public class SPN {
     int[][] substitutions;  // table for substitutions
     int[][] permutations;   // table for permutations
@@ -99,11 +101,23 @@ public class SPN {
         return t;
     }
 
-    // substitutes a list of intermediate text inputs. Should be 16 
+    // substitutes a list of intermediate text inputs. Should be 16 in a [4][4] format
     public int[][] substitue(int[][] t){
-        int[][] u;
+        int[][] u = t;
+        int num;
 
-        return t;
+        // TRY / CATCH block for if there is an issue with mismatched substitution lengths and inputs.
+        try{
+            // iterates through each 'chunk' of 4 bits
+            for(int i = 0; i < t.length; i++){
+                num = this.substitutions[1][binaryToInt(t[i])];
+                u[i] = intToBinary(num);
+            }
+        } catch(Exception e){
+            // hopefully catches any issues with mismatched s-box lengths and inputs
+            System.out.println(e);
+        }
+        return u;
     }
 
     // permutes a list text inputs 
