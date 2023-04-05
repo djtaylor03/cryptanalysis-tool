@@ -1,10 +1,42 @@
 package ec.app.cryptanalysis_tool;
 
+import java.util.Random;
 
 // TODO Make a hell of a lot more robust. Currently only works specifically for my purposes.
 // TODO remove half of s and p as they're only indexes.
 // TODO change implementation to take in TRUE/FALSE boolean instead of 0's and 1's
 public class SPN {
+
+    // Main Class
+    public static void main(String[ ] args) {
+        // generate seeded random keys
+        Random rand = new Random(0);
+
+        // generate key ( 5 being number of subkeys needed, 16 being length of pt)
+        int[] key = new int[5*16];
+
+        for (int i = 0; i < (5*16); i++) {
+            key[i] = rand.nextInt() % 2;
+        }
+
+        int[][] pt = {
+            {0,0,0,1},
+            {0,0,1,0},
+            {0,1,0,0},
+            {1,0,0,0}};
+
+        // run SPN with given input with seeded random keys
+        SPN spn = new SPN(key);
+        int[][] ct = spn.runSPN(pt);
+
+        System.out.println(ct);
+        // save outputs to csv file
+
+    }
+
+
+
+
     int[] substitutions;  // table for substitutions
     int[] permutations;   // table for permutations
     int[] subkey;           // key for mixing
@@ -55,7 +87,7 @@ public class SPN {
         int[][] c;     // final cipher text
 
         // N-1 whole rounds
-        for ( int i = 0; i < this.rounds; i++ ){
+        for ( int i = 1; i < this.rounds; i++ ){
             u = this.subkeyMix(p,i);
             u = this.substitue(u);
             u = this.permute(u);
@@ -77,7 +109,7 @@ public class SPN {
     // XOR values with subkey, r is round number
     public int[][] subkeyMix(int[][] t, int r){
         int[][] u = t;
-        int offset = (16*r);
+        int offset = ((16*r) -1);
 
         for( int i = 0; i < t.length; i++ ){
             for ( int j = 0; j < t[i].length; j++ ){
