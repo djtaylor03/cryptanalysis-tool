@@ -2,9 +2,8 @@ package ec.app.cryptanalysis_tool;
 
 import java.util.Random;
 
-// TODO Make a hell of a lot more robust. Currently only works specifically for my purposes.
-// TODO remove half of s and p as they're only indexes.
-// TODO change implementation to take in TRUE/FALSE boolean instead of 0's and 1's
+// TODO Make a lot more robust. Currently only works specifically for Heys' SPN purposes.
+// TODO better implementation of plaintext and keys
 public class SPN {
 
     // Main Class
