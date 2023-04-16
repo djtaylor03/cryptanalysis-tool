@@ -5,7 +5,7 @@ import java.util.Random;
 // TODO Make a lot more robust. Currently only works specifically for Heys' SPN purposes.
 // TODO better implementation of plaintext and keys
 // TODO figure out why substitute is giving all 0's
-// TODO add plain text as input with SPN constructor
+// TODO change int[][] to array lists I think :(
 public class SPN {
 
     // Main Class
@@ -27,43 +27,25 @@ public class SPN {
             {1,0,0,0}};
 
         // run SPN with given input with seeded random keys
-        SPN spn = new SPN(key);
-        int[][][] spnOuts = spn.runSPN(pt);
+        SPN spn = new SPN(key, pt);
+        int[][][] spnOuts = spn.runSPN();
 
 
-        // create a triple of plaintext, intermediate cipher text and cipher text
-        int[][][] PUCTriple = new int[3][4][4];
-        
-        PUCTriple[0] = pt;
-        PUCTriple[1] = spnOuts[0];
-        PUCTriple[2] = spnOuts[1];
-
-        // save outputs to csv file
-        //System.out.println(PUCTriple.length);
-
-        /*
-        for (int a = 0; a < PUCTriple.length; a++){
-
-            System.out.println(PUCTriple[a].length);
-
-            for (int b = 0; b < PUCTriple[a].length; b++){
-
-                System.out.println();
-
-                for (int c = 0; c < PUCTriple[b].length; c++){
-                    System.out.print(c);
-                    //System.out.print(PUCTriple[a][b][c] + ",");
-                }
-            }
+        for (int i = 0; i < spnOuts.length; i++) {
+            //System.out.println("output" + i);
+            //spn.print(spnOuts[i]);
         }
-        */
-
     }
 
-    int[] substitutions;  // table for substitutions
-    int[] permutations;   // table for permutations
+    int[] substitutions;    // table for substitutions
+    int[] permutations;     // table for permutations
     int[] subkey;           // key for mixing
     int rounds;             // number of rounds an SPN has
+
+    // different text types
+    int [][] plaintext;
+    int [][] intermediatetext;
+    int [][] ciphertext;
 
     /*  A round consists of a subkey mixing stage, an S-Box stage
      *  and a permutation stage.
@@ -77,7 +59,7 @@ public class SPN {
      */
 
     // constructor for SPN with Heys Cipher Network
-    public SPN(int[] k){
+    public SPN(int[] k, int[][] pt){
         int[] s = {14,4,13,1,2,15,11,8,3,10,6,12,5,9,0,7};
         substitutions = s;
 
@@ -86,14 +68,19 @@ public class SPN {
 
         subkey = k;
         rounds = 4;
+
+        plaintext = pt;
+        intermediatetext = pt;
     }
 
     // blank constructor for SPN
-    public SPN(int[] s, int[] p, int[] k, int r){
+    public SPN(int[] s, int[] p, int[] k, int r, int[][] pt){
         substitutions = s;
         permutations = p;
         subkey = k;
         rounds = r;
+        plaintext = pt;
+        intermediatetext = pt;
     }
 
     // run SPN
@@ -105,83 +92,45 @@ public class SPN {
      * 
      * NOTE : formatting with rounds is such to keep consistency with description in Hey's Tutorial
      */
-    public int[][][] runSPN(int[][] p){
-        int[][] u = p;              // intermediate cipher text and starts as plaintext
-        int[][] c;                  // final cipher text
-        int[][][] texts = {p,p};    // output texts
+    public int[][][] runSPN(){
 
         System.out.println("Initial Input");
-        for (int i = 0; i < p.length; i++){
-            for (int j = 0; j < p[i].length; j++){
-                System.out.print(p[i][j]);
-            }
-            System.out.println();
-        }
+        print(this.intermediatetext);
 
         // N-1 whole rounds
         for ( int i = 1; i < this.rounds; i++ ){
             System.out.println("round" + i);
             
             System.out.println("key");
-            u = this.subkeyMix(u,i);
-            for (int q = 0; q < u.length; q++){
-                for (int j = 0; j < u[q].length; j++){
-                    System.out.print(u[q][j]);
-                }
-                System.out.println();
-            }
+            this.intermediatetext = this.subkeyMix(this.intermediatetext,i);
+            print(this.intermediatetext);
 
             System.out.println("sub");
-            u = this.substitue(u);
-            for (int q = 0; q < u.length; q++){
-                for (int j = 0; j < u[q].length; j++){
-                    System.out.print(u[q][j]);
-                }
-                System.out.println();
-            }
+            this.intermediatetext = this.substitue(this.intermediatetext);
+            print(this.intermediatetext);
 
             System.out.println("permute");
-            u = this.permute(u);
-            for (int q = 0; q < u.length; q++){
-                for (int j = 0; j < u[q].length; j++){
-                    System.out.print(u[q][j]);
-                }
-                System.out.println();
-            }
+            this.intermediatetext = this.permute(this.intermediatetext);
+            print(this.intermediatetext);
         }
 
         // final round
         System.out.println("final round");
         System.out.println("key");
-        u = this.subkeyMix(u,this.rounds);
-        for (int i = 0; i < u.length; i++){
-            for (int j = 0; j < u[i].length; j++){
-                System.out.print(u[i][j]);
-            }
-            System.out.println();
-        }
+        this.intermediatetext = this.subkeyMix(this.intermediatetext,this.rounds);
+        print(this.intermediatetext);
 
         System.out.println("sub");
-        c = this.substitue(u);
-        for (int i = 0; i < u.length; i++){
-            for (int j = 0; j < u[i].length; j++){
-                System.out.print(u[i][j]);
-            }
-            System.out.println();
-        }
+        this.ciphertext = this.substitue(this.intermediatetext);
+        print(this.ciphertext);
 
         System.out.println("key");
-        c = this.subkeyMix(c,this.rounds + 1);
-        for (int i = 0; i < u.length; i++){
-            for (int j = 0; j < u[i].length; j++){
-                System.out.print(u[i][j]);
-            }
-            System.out.println();
-        }
+        this.ciphertext = this.subkeyMix(this.ciphertext,this.rounds + 1);
+        print(this.ciphertext);
+
 
         // output cipher text
-        texts[0] = u;
-        texts[1] = c;
+        int[][][] texts = {this.plaintext, this.intermediatetext,this.ciphertext};
 
         return texts;
     }
@@ -215,9 +164,7 @@ public class SPN {
     public int[][] substitue(int[][] t){
         int[][] u = t;
         for (int i = 0; i < t.length; i++ ){
-            int[] q = t[i];
-            int index = binaryToInt(q);
-            int subbedNum = this.substitutions[index];
+            int subbedNum = this.substitutions[binaryToInt(t[i])];
             u[i] = intToBinary(subbedNum);
         }
         return u;
@@ -257,11 +204,33 @@ public class SPN {
 
     // TODO make more robust for other SPNs
     public int[] intToBinary(int i){
-        int[] bs = new int [4];
-        for (int m = 3; m < -1; m--){
-            bs[m] = i%2;
-            i = i - ((i/2)+(i%2));
+        int[] bs = new int[4];
+        for (int p = 3; p > -1; p--){
+            int remainder = i % (int)Math.pow(2,p);
+            if ( i == remainder) { bs[3-p] = 0; }
+            else { 
+                bs[3-p] = 1;
+                i = remainder;
+            }
         }
         return bs;
+    }
+
+    // quick little print function for int[][] structures
+    public void print(int[][] t){
+        for (int i = 0; i < t.length; i++){
+            for (int j = 0; j < t[i].length; j++){
+                System.out.print(t[i][j]);
+            }
+            System.out.println();
+        }
+    }
+
+    public void print(int[] t){
+        System.out.println();
+        for (int i = 0; i < t.length; i++){
+            System.out.print(t[i]);
+        }
+        System.out.println();
     }
 }
