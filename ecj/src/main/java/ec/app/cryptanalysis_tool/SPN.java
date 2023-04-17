@@ -46,9 +46,7 @@ public class SPN {
             s = s + s2;
             if (a < (spnOuts.length - 1)) { s = s + ","; }
         }
-
         System.out.println(s);
-
     }
 
     int[] substitutions;    // table for substitutions
