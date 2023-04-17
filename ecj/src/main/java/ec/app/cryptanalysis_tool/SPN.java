@@ -8,7 +8,9 @@ public class SPN {
     // Main Class
     public static void main(String[] args) {
         // generate seeded random keys
-        Random rand = new Random(0);
+
+        int seed = 0;
+        Random rand = new Random(seed);
 
         // generate key ( 5 being number of subkeys needed * 16 being length of pt)
         int[] key = new int[80];
@@ -27,11 +29,26 @@ public class SPN {
         SPN spn = new SPN(key, pt);
         int[][][] spnOuts = spn.runSPN();
 
+        // add spnOuts to csv file
+        // convert to strings SEED, PT[][], UT[][], CT[] 
+        String s = Integer.toString(seed) + ", ";
 
-        for (int i = 0; i < spnOuts.length; i++) {
-            System.out.println("output" + i);
-            spn.print(spnOuts[i]);
+        for (int a = 0; a < spnOuts.length; a++){
+            String s2 = "";
+            for (int b = 0; b < spnOuts[a].length; b++){
+                if (b == 0) { s2 = s2 + "["; }
+                for (int c = 0; c < spnOuts[a][b].length; c++){
+                    s2 = s2 + Integer.toString(spnOuts[a][b][c]);
+                    if (c == (spnOuts[a][b].length - 1) & (b != (spnOuts[a].length - 1))) { s2 = s2 + ","; }
+                }
+                if (b == (spnOuts[a].length - 1)) { s2 = s2 + "]"; }
+            }
+            s = s + s2;
+            if (a < (spnOuts.length - 1)) { s = s + ","; }
         }
+
+        System.out.println(s);
+
     }
 
     int[] substitutions;    // table for substitutions
