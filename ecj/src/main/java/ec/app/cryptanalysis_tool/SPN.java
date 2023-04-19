@@ -1,5 +1,10 @@
 package ec.app.cryptanalysis_tool;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 // TODO Make a lot more robust and streamlined
@@ -30,23 +35,34 @@ public class SPN {
         int[][][] spnOuts = spn.runSPN();
 
         // add spnOuts to csv file
+        List<String> data = new ArrayList<String>();
         // convert to strings SEED, PT[][], UT[][], CT[] 
-        String s = Integer.toString(seed) + ", ";
-
+        data.add(Integer.toString(seed));
         for (int a = 0; a < spnOuts.length; a++){
-            String s2 = "";
+            String s = "";
             for (int b = 0; b < spnOuts[a].length; b++){
-                if (b == 0) { s2 = s2 + "["; }
+                if (b == 0) { s = s + "["; }
                 for (int c = 0; c < spnOuts[a][b].length; c++){
-                    s2 = s2 + Integer.toString(spnOuts[a][b][c]);
-                    if (c == (spnOuts[a][b].length - 1) & (b != (spnOuts[a].length - 1))) { s2 = s2 + ","; }
+                    s = s + Integer.toString(spnOuts[a][b][c]);
+                    if (c == (spnOuts[a][b].length - 1) & (b != (spnOuts[a].length - 1))) { s = s + ","; }
                 }
-                if (b == (spnOuts[a].length - 1)) { s2 = s2 + "]"; }
+                if (b == (spnOuts[a].length - 1)) { s = s + "]"; }
             }
-            s = s + s2;
-            if (a < (spnOuts.length - 1)) { s = s + ","; }
+            data.add(s);
         }
-        System.out.println(s);
+
+        // file handling
+        File file = new File("C:\\Users\\Dan\\filename.txt.txt");
+        try {
+            FileWriter writer = new FileWriter(file);
+            for (String s: data){
+                writer.write(s);
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
     }
 
     int[] substitutions;    // table for substitutions
