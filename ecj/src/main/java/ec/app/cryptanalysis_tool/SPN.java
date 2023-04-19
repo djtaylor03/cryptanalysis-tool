@@ -7,62 +7,63 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-// TODO Make a lot more robust and streamlined
+// TODO add robustness and streamlining
 public class SPN {
 
     // Main Class
-    public static void main(String[] args) {
-        // generate seeded random keys
+    public static void main(String[] args) throws IOException {
 
-        int seed = 0;
-        Random rand = new Random(seed);
+        int max = 1000;    // number of iterations
+        File file = new File("C:\\Users\\Dan\\Dissertation\\results.txt");  // file path TODO add as param
+        FileWriter writer = new FileWriter(file);
+        writer.write("SEED\t[PLAIN-TEXT]\t[INTERMEDIATE-CIPHER-TEXT]\t[CIPHER-TEXT]\n");
 
-        // generate key ( 5 being number of subkeys needed * 16 being length of pt)
-        int[] key = new int[80];
+        // loop through, incrementing seeds for random generator
+        for (int i = 0; i < max; i++ ){
+            // generate seeded random keys
+            Random rand = new Random(i);
 
-        for (int i = 0; i < key.length; i++) {
-            key[i] = rand.nextInt() % 2;
-        }
+            // generate key (5 being number of subkeys needed * 16 being length of pt)
+            int[] key = new int[80];
 
-        int[][] pt = {
-            {0,0,0,1},
-            {0,0,1,0},
-            {0,1,0,0},
-            {1,0,0,0}};
-
-        // run SPN with given input with seeded random keys
-        SPN spn = new SPN(key, pt);
-        int[][][] spnOuts = spn.runSPN();
-
-        // add spnOuts to csv file
-        List<String> data = new ArrayList<String>();
-        // convert to strings SEED, PT[][], UT[][], CT[] 
-        data.add(Integer.toString(seed));
-        for (int a = 0; a < spnOuts.length; a++){
-            String s = "";
-            for (int b = 0; b < spnOuts[a].length; b++){
-                if (b == 0) { s = s + "["; }
-                for (int c = 0; c < spnOuts[a][b].length; c++){
-                    s = s + Integer.toString(spnOuts[a][b][c]);
-                    if (c == (spnOuts[a][b].length - 1) & (b != (spnOuts[a].length - 1))) { s = s + ","; }
-                }
-                if (b == (spnOuts[a].length - 1)) { s = s + "]"; }
+            for (int k = 0; k < key.length; k++) {
+                key[k] = rand.nextInt() % 2;
             }
-            data.add(s);
-        }
 
-        // file handling
-        File file = new File("C:\\Users\\Dan\\filename.txt.txt");
-        try {
-            FileWriter writer = new FileWriter(file);
+            int[][] pt = {
+                {0,0,0,1},
+                {0,0,1,0},
+                {0,1,0,0},
+                {1,0,0,0}};
+
+            // run SPN with given input with seeded random keys
+            SPN spn = new SPN(key, pt);
+            int[][][] spnOuts = spn.runSPN();
+
+            // add spnOuts to csv file
+            List<String> data = new ArrayList<String>();
+            // convert to strings SEED, PT[][], UT[][], CT[] 
+            data.add(Integer.toString(i) + "\t");
+            for (int a = 0; a < spnOuts.length; a++){
+                String s = "";
+                for (int b = 0; b < spnOuts[a].length; b++){
+                    if (b == 0) { s = s + "["; }
+                    for (int c = 0; c < spnOuts[a][b].length; c++){
+                        s = s + Integer.toString(spnOuts[a][b][c]);
+                        if (c == (spnOuts[a][b].length - 1) & (b != (spnOuts[a].length - 1))) { s = s + ","; }
+                    }
+                    if (b == (spnOuts[a].length - 1)) { s = s + "]\t"; }
+                }
+                data.add(s);
+            }
+
+            // file handling
             for (String s: data){
                 writer.write(s);
             }
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            writer.write("\n");
         }
-        
+        writer.close();  
     }
 
     int[] substitutions;    // table for substitutions
