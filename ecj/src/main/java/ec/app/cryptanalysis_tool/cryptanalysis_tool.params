@@ -1,0 +1,3 @@
+breedthreads	= 1
+evalthreads	    = 1
+seed.0		    = 4357

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 // TODO add robustness and streamlining
+// TODO change from random seeds for keys, to random plain text inputs
 public class SPN {
 
     // Main Class
@@ -16,25 +17,30 @@ public class SPN {
         int max = 1000;    // number of iterations
         File file = new File("C:\\Users\\Dan\\Dissertation\\results.txt");  // file path TODO add as param
         FileWriter writer = new FileWriter(file);
-        writer.write("SEED\t[PLAIN-TEXT]\t[INTERMEDIATE-CIPHER-TEXT]\t[CIPHER-TEXT]\n");
+        writer.write("[PLAIN-TEXT]\t[INTERMEDIATE-CIPHER-TEXT]\t[CIPHER-TEXT]\n");
+
+        // generate seeded random key
+        Random rand = new Random(max);
+
+        // generate key (5 being number of subkeys needed * 16 being length of pt)
+        int[] key = new int[80];
+
+        for (int k = 0; k < key.length; k++) {
+            key[k] = Math.abs(rand.nextInt() % 2);
+        }
 
         // loop through, incrementing seeds for random generator
         for (int i = 0; i < max; i++ ){
-            // generate seeded random keys
-            Random rand = new Random(i);
 
-            // generate key (5 being number of subkeys needed * 16 being length of pt)
-            int[] key = new int[80];
+            Random r = new Random(i);
 
-            for (int k = 0; k < key.length; k++) {
-                key[k] = rand.nextInt() % 2;
+            int[][] pt = new int[4][4];
+
+            for (int a = 0; a < 4; a++){
+                for (int b = 0; b < 4; b++){
+                    pt[a][b] = Math.abs(r.nextInt() % 2);
+                }
             }
-
-            int[][] pt = {
-                {0,0,0,1},
-                {0,0,1,0},
-                {0,1,0,0},
-                {1,0,0,0}};
 
             // run SPN with given input with seeded random keys
             SPN spn = new SPN(key, pt);
@@ -42,8 +48,7 @@ public class SPN {
 
             // add spnOuts to csv file
             List<String> data = new ArrayList<String>();
-            // convert to strings SEED, PT[][], UT[][], CT[] 
-            data.add(Integer.toString(i) + "\t");
+            // convert to strings PT[][], UT[][], CT[] 
             for (int a = 0; a < spnOuts.length; a++){
                 String s = "";
                 for (int b = 0; b < spnOuts[a].length; b++){
